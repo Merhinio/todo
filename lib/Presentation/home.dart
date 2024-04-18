@@ -3,6 +3,8 @@ import 'package:todo/Repository/repository.dart';
 import 'package:todo/models/todo.dart';
 import 'package:todo/styles/customstyle.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 
 
 import 'package:todo/styles/textstyle.dart';
@@ -12,11 +14,15 @@ class MyHome extends StatefulWidget {
 
   @override
   State<MyHome> createState() => _MyHomeState();
+
 }
 
+
 class _MyHomeState extends State<MyHome> {
-  final TodoRepository todoRepository = TodoRepository();
   TextEditingController todoController = TextEditingController();
+
+
+ 
 
 
 
@@ -54,7 +60,7 @@ class _MyHomeState extends State<MyHome> {
                           title: todoController.text,
                           creationDate: DateTime.now(),
                         );
-                        todoRepository.addTodo(newTodo);
+                        context.read<TodoProvider>().addTodo(newTodo);
                         todoController.clear();
                         Navigator.of(context).pop();
                       });
@@ -66,6 +72,8 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
+    final todoProvider = context.watch<TodoProvider>();
+
     return Stack(children: [
       Container(
         decoration: customBackground,
@@ -104,35 +112,33 @@ class _MyHomeState extends State<MyHome> {
               endIndent: 20,
               indent: 10,
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: todoRepository.createdTodos.length,
-                itemBuilder: (context, index) {
-                  final item = todoRepository.createdTodos[index];
-                  
-                  return ListTile(
-                    
-                    title: Text(item.title),
-                    
-                    subtitle: Text(
-                      item.finishDate != null
-                          ? 'Erledigt: ${item.finishDate}'
-                          : 'Noch nicht erledigt',
-                    ),
-                    trailing: Checkbox(
-                      value: item.isDone,
-                      onChanged: (value) {
-                        setState(() {
-                          item.isDone = value!;
-                        });
-                        if (item.isDone) {
-                          todoRepository.finishTodo(item);
-                        }
-                      },
-                    ),
-                  );
-                },
-              ),
+            Consumer<TodoProvider>(
+              builder: (context, todoProvider, child) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: todoProvider.createdTodos.length,
+                    itemBuilder: (context, index) {
+                      final item = todoProvider.createdTodos[index];
+                      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(item.creationDate);
+                      return ListTile(
+                        title: Text(item.title),
+                        subtitle: Text('Erstellt am: $formattedDate'),
+                        trailing: Checkbox(
+                          value: item.isDone,
+                          onChanged: (value) {
+                            setState(() {
+                              item.isDone = value!;
+                              if (item.isDone) {
+                                todoProvider.finishTodo(item);
+                              }
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -147,27 +153,33 @@ class _MyHomeState extends State<MyHome> {
               endIndent: 20,
               indent: 10,
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: todoRepository.finishedTodos.length,
-                itemBuilder: (context, index) {
-                  final item = todoRepository.finishedTodos[index];
-                  String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(item.creationDate);
-                  return ListTile(
-                    title: Text(item.title),
-                    
-                    subtitle: Text('Erledigt am: $formattedDate'),
-                    trailing: Checkbox(
-                      value: item.isDone,
-                      onChanged: (value) {
-                        setState(() {
-                          item.isDone = value!;
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
+            Consumer<TodoProvider>(
+              builder: (context, todoProvider, child) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: todoProvider.finishedTodos.length,
+                    itemBuilder: (context, index) {
+                      final item = todoProvider.finishedTodos[index];
+                      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(item.creationDate);
+                      return ListTile(
+                        title: Text(item.title),
+                        subtitle: Text('Erstellt am: $formattedDate'),
+                        trailing: Checkbox(
+                          value: item.isDone,
+                          onChanged: (value) {
+                            setState(() {
+                              item.isDone = value!;
+                              if (!item.isDone) {
+                                todoProvider.addTodo(item);
+                              }
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),
