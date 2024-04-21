@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:todo/Repository/todo_provider.dart';
 import 'package:todo/models/todo.dart';
 import 'package:todo/styles/customstyle.dart';
-import 'package:intl/intl.dart';
+
 import 'package:provider/provider.dart';
 
 import 'package:todo/styles/textstyle.dart';
+import 'package:todo/widgets/custom_divider.dart';
+import 'package:todo/widgets/dialogs.dart';
 import 'package:todo/widgets/todo_count.dart';
+import 'package:todo/widgets/todo_lists.dart';
 
 class MyHome extends StatefulWidget {
+  const MyHome({super.key});
+
   @override
   State<MyHome> createState() => _MyHomeState();
 }
@@ -24,76 +29,18 @@ class _MyHomeState extends State<MyHome> {
     Provider.of<TodoProvider>(context, listen: false).loadTodos();
   }
 
-
-
   void alertDialogdelete(BuildContext context, Todo item) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      title: const Text('Todo löschen'),
-      content: const Text('Möchten Sie diese Todo wirklich löschen?'),
-      actions: [
-        
-        TextButton(
-          child: const Text('Löschen'),
-          onPressed: () {
-            final todoProvider = Provider.of<TodoProvider>(context, listen: false);
-            todoProvider.removeTodo(item);
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Todo gelöscht'),
-                action: SnackBarAction(
-                  label: 'Rückgängig',
-                  onPressed: () {
-                    todoProvider.addTodo(item);
-                  },
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => DeleteTodoDialog(item: item),
+    );
+  }
 
   void alertDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Add Todo'),
-        content: TextField(
-          onTapOutside: (PointerDownEvent event) {
-            FocusScope.of(context).unfocus();
-          },
-          controller: todoController,
-          decoration: const InputDecoration(
-            hintText: 'Füge eine ToDo hinzu',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Schließen'),
-          ),
-          TextButton(
-            onPressed: () {
-              final newTodo = Todo(
-                title: todoController.text,
-                creationDate: DateTime.now(),
-              );
-              Provider.of<TodoProvider>(context, listen: false)
-                  .addTodo(newTodo);
-              todoController.clear();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Hinzufügen'),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) =>
+          AddTodoDialog(todoController: todoController),
     );
   }
 
@@ -115,7 +62,6 @@ class _MyHomeState extends State<MyHome> {
         Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-           
             backgroundColor: Colors.transparent,
             actions: [
               IconButton(
@@ -127,7 +73,6 @@ class _MyHomeState extends State<MyHome> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               TodoCountRow(
                 openTodosCount: openTodosCount,
                 completedTodosCount: completedTodosCount,
@@ -139,34 +84,9 @@ class _MyHomeState extends State<MyHome> {
                   style: headline1,
                 ),
               ),
-              const Divider(
-                color: Colors.black,
-                thickness: 0.09,
-                endIndent: 20,
-                indent: 10,
-              ),
+              const CustomDivider(),
               Expanded(
-                child: ListView.builder(
-                  itemCount: createdTodos.length,
-                  itemBuilder: (context, index) {
-                    final item = createdTodos[index];
-                    return ListTile(
-                     
-                      title: Text(item.title),
-                      subtitle: Text(
-                        item.finishDate != null
-                            ? 'Erledigt am: ${(item.finishDate!)} ${(item.finishDate!)}'
-                            : 'Noch nicht erledigt',
-                      ),
-                      trailing: Checkbox(
-                        value: item.isDone,
-                        onChanged: (value) {
-                          todoProvider.setTodoStatus(item, value!);
-                        },
-                      ),
-                    );
-                  },
-                ),
+                child: CreatedTodosList(createdTodos: createdTodos),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -175,31 +95,11 @@ class _MyHomeState extends State<MyHome> {
                   style: headline1,
                 ),
               ),
-              const Divider(
-                color: Colors.black,
-                thickness: 0.09,
-                endIndent: 20,
-                indent: 10,
-              ),
+              const CustomDivider(),
               Expanded(
-                child: ListView.builder(
-                  itemCount: finishedTodos.length,
-                  itemBuilder: (context, index) {
-                    final item = finishedTodos[index];
-                    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
-                        .format(item.creationDate);
-                    return ListTile(
-                       onLongPress: () => alertDialogdelete(context, item),
-                      title: Text(item.title),
-                      subtitle: Text('Erledigt am: $formattedDate'),
-                      trailing: Checkbox(
-                        value: item.isDone,
-                        onChanged: (value) {
-                          todoProvider.setTodoStatus(item, value!);
-                        },
-                      ),
-                    );
-                  },
+                child: FinishedTodosList(
+                  finishedTodos: finishedTodos,
+                  onTodoLongPress: (todo) => alertDialogdelete(context, todo),
                 ),
               ),
             ],

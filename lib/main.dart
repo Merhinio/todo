@@ -4,6 +4,6 @@ import 'package:todo/Repository/todo_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider(create: (context) => TodoProvider(), child:  MaterialApp(home: MyHome(), debugShowCheckedModeBanner: false)));
+  runApp(ChangeNotifierProvider(create: (context) => TodoProvider(), child:  const MaterialApp(home: MyHome(), debugShowCheckedModeBanner: false)));
 }
 
