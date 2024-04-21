@@ -16,12 +16,47 @@ class MyHome extends StatefulWidget {
 
 class _MyHomeState extends State<MyHome> {
   final TextEditingController todoController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     Provider.of<TodoProvider>(context, listen: false).loadTodos();
   }
+
+
+
+  void alertDialogdelete(BuildContext context, Todo item) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: const Text('Todo löschen'),
+      content: const Text('Möchten Sie diese Todo wirklich löschen?'),
+      actions: [
+        
+        TextButton(
+          child: const Text('Löschen'),
+          onPressed: () {
+            final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+            todoProvider.removeTodo(item);
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Todo gelöscht'),
+                action: SnackBarAction(
+                  label: 'Rückgängig',
+                  onPressed: () {
+                    todoProvider.addTodo(item);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}
 
   void alertDialog(BuildContext context) {
     showDialog(
@@ -80,6 +115,7 @@ class _MyHomeState extends State<MyHome> {
         Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
+           
             backgroundColor: Colors.transparent,
             actions: [
               IconButton(
@@ -91,13 +127,7 @@ class _MyHomeState extends State<MyHome> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: SearchBar(
-                  hintText: 'Search...',
-                  leading: Icon(Icons.search),
-                ),
-              ),
+              
               TodoCountRow(
                 openTodosCount: openTodosCount,
                 completedTodosCount: completedTodosCount,
@@ -121,6 +151,7 @@ class _MyHomeState extends State<MyHome> {
                   itemBuilder: (context, index) {
                     final item = createdTodos[index];
                     return ListTile(
+                     
                       title: Text(item.title),
                       subtitle: Text(
                         item.finishDate != null
@@ -158,6 +189,7 @@ class _MyHomeState extends State<MyHome> {
                     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
                         .format(item.creationDate);
                     return ListTile(
+                       onLongPress: () => alertDialogdelete(context, item),
                       title: Text(item.title),
                       subtitle: Text('Erledigt am: $formattedDate'),
                       trailing: Checkbox(

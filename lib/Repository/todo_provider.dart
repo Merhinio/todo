@@ -38,6 +38,8 @@ class TodoProvider extends ChangeNotifier {
     return finishedTodos;
   }
 
+  
+
   void addTodo(Todo todo) async {
     todos.add(todo);
     await todoStorage.saveTodos(todos);
