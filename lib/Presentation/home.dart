@@ -7,6 +7,7 @@ import 'package:todo/styles/customstyle.dart';
 import 'package:provider/provider.dart';
 
 import 'package:todo/styles/textstyle.dart';
+import 'package:todo/widgets/add_todo_bottom_sheet.dart';
 import 'package:todo/widgets/custom_divider.dart';
 import 'package:todo/widgets/dialogs.dart';
 import 'package:todo/widgets/todo_count.dart';
@@ -66,7 +67,7 @@ class _MyHomeState extends State<MyHome> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.add),
-                onPressed: () => alertDialog(context),
+                onPressed: () => showAddTodoBottomSheet(context),
               ),
             ],
           ),
