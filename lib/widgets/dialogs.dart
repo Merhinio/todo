@@ -1,4 +1,4 @@
-// in dialogs.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/Repository/todo_provider.dart';
@@ -33,6 +33,7 @@ class AddTodoDialog extends StatelessWidget {
               final newTodo = Todo(
                 title: todoText,
                 creationDate: DateTime.now(),
+                
               );
               Provider.of<TodoProvider>(context, listen: false)
                   .addTodo(newTodo);

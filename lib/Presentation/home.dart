@@ -21,7 +21,7 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  final TextEditingController todoController = TextEditingController();
+  
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -34,14 +34,6 @@ class _MyHomeState extends State<MyHome> {
     showDialog(
       context: context,
       builder: (BuildContext context) => DeleteTodoDialog(item: item),
-    );
-  }
-
-  void alertDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) =>
-          AddTodoDialog(todoController: todoController),
     );
   }
 
